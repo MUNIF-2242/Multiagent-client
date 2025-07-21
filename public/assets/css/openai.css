@@ -1,0 +1,87 @@
+.openai-progress {
+  height: 20px;
+}
+
+.main-content .chatting-panel .msg-type-area form .chat-input {
+  width: calc(100% - 40px);
+}
+
+.swal2-timer-progress-bar {
+  background: #28a745 !important;
+}
+.bouncing-loader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px; /* space between circles */
+}
+
+.bouncing-loader div {
+  width: 8px;
+  height: 8px;
+  background-color: #ffffff; /* adjust to fit your theme */
+  border-radius: 50%;
+  animation: bouncing 0.6s infinite alternate;
+}
+
+.bouncing-loader div:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.bouncing-loader div:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bouncing {
+  from {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+.bedrock-custom-panel {
+  width: 100% !important;
+}
+/* Global override for Swal in dark mode */
+
+.swal2-title {
+  color: #1e1e1e !important;
+}
+.custom-bg-success-subtle {
+  background-color: #2d893a !important;
+  color: #ffffff !important;
+}
+
+.textarea-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0); /* optional for dim effect */
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px; /* match your textarea */
+}
+
+.custom-whiteText {
+  /* color: #f0f0f0; */
+}
+
+.input-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0); /* optional */
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.375rem; /* match your input rounding */
+  pointer-events: none;
+}
+
+.custom-footer-style {
+  position: fixed;
+}
