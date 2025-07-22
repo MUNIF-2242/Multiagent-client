@@ -168,85 +168,49 @@ export const RagChatbotProvider = ({ children }) => {
       return;
     }
 
-    const userQuestion = inputMessage;
+    const query = inputMessage;
     setInputMessage("");
     setModelResponse("");
     setUpdateAnswer("");
 
-    const userMessage = { role: "user", content: userQuestion };
+    const userMessage = { role: "user", content: query };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setBotResponseLoading(true);
+    setAnswerSourceLoading(true);
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/aws/haiku/ask`,
+        `${process.env.NEXT_PUBLIC_FAMBOT_LAMBDA_URL}/ask`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userQuestion }),
+          body: JSON.stringify({ query }),
         }
       );
 
-      if (!response.ok || !response.body) {
-        throw new Error("Streaming failed");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error Response:", errorText);
+        throw new Error("Failed to fetch response");
       }
-      setAnswerSourceLoading(true);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
+      const data = await response.json();
+      console.log("✅ API Response:", data);
 
-      let fullText = "";
+      const assistantMessage = {
+        role: "assistant",
+        content: data.response?.trim() || "No response received.",
+      };
 
-      const assistantMessage = { role: "assistant", content: "" };
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
-      setBotResponseLoading(false);
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        fullText += chunk;
-
-        // Live stream display: exclude metadata
-        const answerOnly = fullText.split("---METADATA---")[0];
-
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          const lastIndex = updatedMessages.length - 1;
-          updatedMessages[lastIndex] = {
-            ...updatedMessages[lastIndex],
-            content: answerOnly.trim(),
-          };
-          return updatedMessages;
-        });
-      }
-
-      // Extract and parse metadata after stream ends
-      const [_, metadataChunk] = fullText.split("---METADATA---");
-      let metadata = null;
-      if (metadataChunk) {
-        try {
-          const metadata = JSON.parse(metadataChunk.trim());
-          console.log("📚 Metadata:", metadata);
-
-          const parsedBody = JSON.parse(metadata.body);
-
-          setModelResponse({
-            source: parsedBody.source,
-            userQuestion: parsedBody.userQuestion || "",
-          });
-          setUpdateAnswer(parsedBody.source?.originalText || "");
-        } catch (err) {
-          console.error("❌ Failed to parse metadata:", err);
-        }
-      }
+      // Optional: set model metadata for debugging or future UI
+      setModelResponse(data);
     } catch (error) {
-      console.error("❌ Error:", error);
-      showToast("error", "Error during query submission", error.message);
+      console.error("❌ Error during submission:", error);
+      showToast("error", "Error during query submission: " + error.message);
     } finally {
-      // setBotResponseLoading(false);
+      setBotResponseLoading(false);
       setAnswerSourceLoading(false);
     }
   };
